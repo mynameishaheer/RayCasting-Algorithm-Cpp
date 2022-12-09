@@ -3,8 +3,8 @@
 #include "Boundary.h"
 #include "RayParticles.h"
 
-const int SCREEN_WIDTH = 640;
-const int SCREEN_HEIGHT = 480;
+const int SCREEN_WIDTH = 1000;
+const int SCREEN_HEIGHT = 1000;
 
 const int MOVE = 5;
 
@@ -41,6 +41,9 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
+	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+
+
 	bool quit = false;
 
 	SDL_Event e;
@@ -57,7 +60,7 @@ int main(int argc, char* argv[])
 	//right boundary
 	walls[2] = new Boundary(SCREEN_WIDTH - s, s, SCREEN_WIDTH, SCREEN_HEIGHT);
 	//bottom boundary 
-	walls[3] = new Boundary(s, SCREEN_HEIGHT -s, SCREEN_WIDTH -s, SCREEN_HEIGHT -s);
+	walls[3] = new Boundary(s, SCREEN_HEIGHT - s, SCREEN_WIDTH - s, SCREEN_HEIGHT - s);
 
 	for (int i = 4; i < 9; i++) {
 		int x1 = rand() % SCREEN_WIDTH;
@@ -68,14 +71,10 @@ int main(int argc, char* argv[])
 		walls[i] = new Boundary(x1, y1, x2, y2);
 	}
 
-	//Boundary* wall = new Boundary(100, 100, 200, 300);
-	//Ray* ray = new Ray(100, 200);
-	RayParticle* particle = new RayParticle(SCREEN_WIDTH/2, SCREEN_HEIGHT/2);
-	//SDL_Rect* rect = new SDL_Rect();
+	RayParticle* particle = new RayParticle(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
 
 	while (!quit) {
 
-		//store mouse coordinates
 		while (SDL_PollEvent(&e) != 0) {
 			if (e.type == SDL_QUIT) {
 				quit = true;
@@ -86,73 +85,52 @@ int main(int argc, char* argv[])
 					quit = true;
 					break;
 				}
+				//UP
 				if (SDLK_UP == e.key.keysym.sym) {
 					particle->update(0, -MOVE);
+					particle->changeDirection(0);
 				}
-				if (SDLK_DOWN== e.key.keysym.sym) {
-					particle->update(0, MOVE);
-				}
-				if (SDLK_LEFT == e.key.keysym.sym) {
-					particle->update( -MOVE, 0);
-				}
+				//RIGHT
 				if (SDLK_RIGHT == e.key.keysym.sym) {
 					particle->update(MOVE, 0);
+					particle->changeDirection(1);
+				}
+				//LEFT
+				if (SDLK_LEFT == e.key.keysym.sym) {
+					particle->update(-MOVE, 0);
+					particle->changeDirection(2);
+				}
+				//DOWN
+				if (SDLK_DOWN == e.key.keysym.sym) {
+					particle->update(0, MOVE);
+					particle->changeDirection(3);
 				}
 			}
 
+			//store mouse coordinates
 			if (e.type == SDL_MOUSEMOTION) {
 				SDL_GetMouseState(&mouseX, &mouseY);
 			}
 		}
 
-		// Set the background color to white
-		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+		// Set the background color to BLACK
+		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 		SDL_RenderClear(renderer);
 
-		// Set the ray color to black
-		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+		// Set the wall color to WHITE
+		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 25);
 
 		//draw the wall
 		for (int i = 0; i < 9; i++) {
 			walls[i]->show(renderer);
 		}
 		Boundary** ptr = walls;
-		//wall->show(renderer);
 
-		//particle->update(mouseX, mouseY);
 		particle->show(renderer);
 		particle->look(ptr, renderer);
-		//particle->look(wall, renderer);
-
-		////determine the direction of the ray
-		//ray->lookAt(mouseX, mouseY);
-		////calculate if the ray is hitting the wall
-		//float* pt;
-		//pt = ray->cast(wall);
-		////draw the ray
-		//ray->show(renderer);
-
-		//if (pt != nullptr) {
-		//	SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
-
-
-		//	//SDL_RenderFillRect(renderer, rect);
-		//	rect->x = *(pt + 0);
-		//	rect->y = *(pt + 1);
-		//	rect->w = 1;
-		//	rect->h = 20;
-
-		//	SDL_RenderDrawRect(renderer, rect);
-
-		//	//SDL_RenderDrawPoint(renderer, *(pt + 0), *(pt + 1));
-		//}
-
 
 		//show the screen
 		SDL_RenderPresent(renderer);
-
-		// Wait for 5 seconds
-		//SDL_Delay(50);
 
 	}
 
